@@ -258,7 +258,7 @@ uci commit dhcp
 /etc/init.d/dnsmasq restart
 echo -e "${GREEN}** DNS Rebind Fixed **${NC}"
 
-rm -f /root/set.sh
+rm -f "$0"
 /sbin/reload_config
 echo -e "${CYAN}** Installation Completed **${NC}"
 
