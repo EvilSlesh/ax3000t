@@ -132,8 +132,13 @@ install_tmp() {
   ipk_file=$(ls -t ${pkg}_*.ipk | head -n1)
   opkg install "$ipk_file"
   install_status=$?
-  # Cleanup regardless of installation status
-  rm -f ${pkg}_*.ipk
+  # Aggressive cleanup after install
+  rm -rf /tmp/*.ipk /tmp/opkg-lists/* /tmp/opkg-*.tmp
+  [ -d /var/cache/opkg ] && rm -rf /var/cache/opkg/*
+  [ -d /var/lock ] && rm -rf /var/lock/*
+  sync
+  echo 3 > /proc/sys/vm/drop_caches
+  #rm -f ${pkg}_*.ipk
   if [ $install_status -ne 0 ]; then
     echo -e "${RED}Installation failed for $pkg${NC}"
   else
@@ -147,6 +152,8 @@ install_tmp() {
 opkg remove dnsmasq
 install_tmp dnsmasq-full
 install_tmp wget-ssl
+install_tmp sing-box
+install_tmp hysteria
 install_tmp luci-app-passwall2
 install_tmp ipset
 install_tmp kmod-tun
@@ -154,8 +161,6 @@ install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
 #install_tmp kmod-inet-diag
 #install_tmp kmod-netlink-diag
-install_tmp sing-box
-install_tmp hysteria
 
 # Function to verify installation
 verify_installation() {
