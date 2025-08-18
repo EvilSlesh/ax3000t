@@ -61,15 +61,15 @@ echo -e "${GREEN}WAN is up.${NC}"
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
 uci delete system.ntp.server
-uci add_list system.ntp.server='0.asia.pool.ntp.org'
+uci add_list system.ntp.server='time.google.com'
 uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
 uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized!${NC}"
 
-echo -e "${YELLOW}Syncing time with NTP...${NC}"
-ntpd -n -q -p 0.asia.pool.ntp.org || {
+echo -e "${YELLOW}Syncing time with Google NTP...${NC}"
+ntpd -n -q -p time.google.com || {
   echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
   ntpd -n -q -p 0.openwrt.pool.ntp.org || {
     echo -e "${RED}NTP sync failed again. Please check DNS/network.${NC}"
