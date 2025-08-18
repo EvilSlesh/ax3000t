@@ -125,7 +125,7 @@ install_tmp() {
 opkg remove dnsmasq
 install_tmp dnsmasq-full
 #install_tmp wget-ssl
-install_tmp luci-app-passwall2=25.7.15-1
+install_tmp luci-app-passwall2
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
