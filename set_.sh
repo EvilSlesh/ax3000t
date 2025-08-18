@@ -110,6 +110,22 @@ install_tmp() {
   return $install_status
 }
 
+opkg remove \
+    odhcp6c \
+    odhcpd-ipv6only \
+    ip6tables kmod-ip6tables \
+    kmod-ppp \
+    kmod-pppoe \
+    kmod-pppox \
+    ppp \
+    ppp-mod-pppoe \
+    ppp-mod-pptp \
+    ppp-mod-pppol2tp \
+    wpad-openssl \
+    kmod-usb-core \
+    kmod-usb2 \
+    kmod-usb3 \
+    kmod-usb-storage
 # Main Install Sequence
 install_tmp luci-app-passwall2
 install_tmp sing-box
