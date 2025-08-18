@@ -144,11 +144,13 @@ install_tmp() {
 # Main Install Sequence
 opkg remove dnsmasq
 install_tmp dnsmasq-full
+#install_tmp luci-app-passwall2 #latest version issue due to storage limit
 install_tmp luci-app-passwall2 "https://github.com/xiaorouji/openwrt-passwall2/releases/download/25.7.15-1/luci-24.10_luci-app-passwall2_25.7.15-r1_all.ipk"
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
+#install_tmp sing-box #latest version issue due to storage limit
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_aarch64_cortex-a53.ipk"
 install_tmp hysteria
 sleep 2
@@ -176,7 +178,7 @@ verify_installation "Hysteria" "/usr/bin/hysteria"
 wget -O /tmp/status.htm https://raw.githubusercontent.com/sadraimam/ax3000t/refs/heads/main/status.htm
 cp /tmp/status.htm /usr/lib/lua/luci/view/passwall2/global/status.htm
 cp /tmp/status.htm /usr/lib64/lua/luci/view/passwall2/global/status.htm
-echo "/usr/lib/lua/luci/view/passwall2/global/status.htm" >> /lib/upgrade/keep.d/luci-app-passwall2
+echo "/usr/lib/lua/luci/view/passwall2/global/status.htm" >> /lib/upgrade/keep.d/luci-app-passwall2 #issue: installing update wipes the patch
 rm -f /tmp/status.htm
 echo -e "${GREEN}** Passwall Patched ** ${NC}"
 
