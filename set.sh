@@ -76,17 +76,14 @@ opkg update
 install_tmp() {
   pkg="$1"
   url="$2"  # Optional custom download URL
-
   # Check if package is already installed
   if opkg list-installed | grep -q "^$pkg - "; then
     echo -e "${GREEN}$pkg is already installed. Skipping.${NC}"
     return 0
   fi
-
   echo -e "${YELLOW}Installing $pkg ...${NC}"
   cd /tmp || return 1
   rm -f ${pkg}_*.ipk ${pkg}.custom.ipk  # Clean up previous downloads
-
   # Download with retry logic
   retry=3
   while [ $retry -gt 0 ]; do
@@ -101,7 +98,6 @@ install_tmp() {
         echo -e "${RED}No download tool (uclient-fetch/wget) found!${NC}"
         return 1
       fi
-
       # Check if download succeeded
       if [ $? -eq 0 ] && [ -s "${pkg}.custom.ipk" ]; then
         break
@@ -113,14 +109,12 @@ install_tmp() {
         break
       fi
     fi
-
     retry=$((retry - 1))
     if [ $retry -gt 0 ]; then
       echo -e "${RED}Download failed for $pkg. ${retry} attempts remaining. Retrying...${NC}"
       sleep 5
     fi
   done
-
   # Verify download
   if [ -n "$url" ] && [ -s "${pkg}.custom.ipk" ]; then
     ipk_file="${pkg}.custom.ipk"
@@ -130,11 +124,9 @@ install_tmp() {
     echo -e "${RED}Failed to download $pkg after multiple attempts${NC}"
     return 1
   fi
-
   # Install package
   opkg install "$ipk_file"
   install_status=$?
-
   # Cleanup
   rm -f ${pkg}_*.ipk ${pkg}.custom.ipk
   if [ $install_status -ne 0 ]; then
@@ -156,10 +148,10 @@ install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_aarch64_cortex-a53.ipk"
 install_tmp hysteria
-#install_tmp kmod-inet-diag
-#install_tmp kmod-netlink-diag
-opkg --force-overwrite upgrade sing-box
+sleep 2
 opkg --force-overwrite upgrade luci-app-passwall2
+sleep 2
+opkg --force-overwrite upgrade sing-box
 
 # Function to verify installation
 verify_installation() {
