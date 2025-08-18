@@ -56,7 +56,7 @@ uci commit system
 /etc/init.d/system reload
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
 
-# NTP Sync
+# Force NTP Sync
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
 #/usr/sbin/sysntpd -n -q -p 0.asia.pool.ntp.org
 /etc/init.d/sysntpd stop
