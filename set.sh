@@ -26,7 +26,6 @@ fi
 
 # Initialize Network
 uci del network.wan.dns 2>/dev/null
-uci del network.wan6.dns 2>/dev/null
 uci set network.wan.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="8.8.8.8"
