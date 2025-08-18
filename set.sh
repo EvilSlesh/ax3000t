@@ -29,6 +29,8 @@ uci del network.wan.dns 2>/dev/null
 uci del network.wan6.dns 2>/dev/null
 uci set network.wan.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
+uci add_list network.wan.dns="8.8.8.8"
+uci add_list network.wan.dns="1.0.0.1"
 uci add_list network.wan.dns="1.1.1.1"
 uci commit network
 /sbin/reload_config >/dev/null 
@@ -39,10 +41,11 @@ echo -e "${GREEN}Network Initialized! ${NC}"
 # Initialize Time/Date
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
-#uci delete system.ntp.server
-#uci add_list system.ntp.server='ir.pool.ntp.org'
-#uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
-#uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
+uci delete system.ntp.server
+uci add_list system.ntp.server='0.asia.pool.ntp.org'
+uci add_list system.ntp.server='1.asia.pool.ntp.org'
+uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
+uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
