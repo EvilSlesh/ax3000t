@@ -9,7 +9,7 @@ rm -f /tmp/set.sh && wget -O /tmp/set.sh https://raw.githubusercontent.com/sadra
 ```
 
 ## Features
-- Advanced custom package installer using RAM with retry download logic and custom ipk URL option
+- Advanced custom package installer using RAM with retry download logic and optional custom URL
 - Installs and configures Passwall2 with recommended defaults.
 - Sets up optimized DNS and network settings
 - Configures WiFi with secure defaults
