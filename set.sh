@@ -37,6 +37,13 @@ echo -e "${GREEN}Current DNS:"
 echo "IPv4: $(uci get network.wan.dns)"
 echo -e "${GREEN}Network Initialized! ${NC}"
 
+# Wait for Internet
+until ping -c1 -W1 8.8.8.8 >/dev/null 2>&1; do
+    echo -e "${YELLOW}Waiting for Internet...${NC}"
+    sleep 2
+done
+echo -e "${GREEN}Internet is reachable!${NC}"
+
 # Initialize Time/Date
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
