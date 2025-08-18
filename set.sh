@@ -76,47 +76,76 @@ echo -e "${GREEN}Feed Updated!${NC}"
 echo -e "${YELLOW}Updating Packages...${NC}"
 opkg update
 
-# Function to install from tmp
+# Function to install from tmp with optional custom URL
 install_tmp() {
-  pkg="$1"  
+  pkg="$1"
+  url="$2"  # Optional custom download URL
+
   # Check if package is already installed
   if opkg list-installed | grep -q "^$pkg - "; then
     echo -e "${GREEN}$pkg is already installed. Skipping.${NC}"
     return 0
   fi
+
   echo -e "${YELLOW}Installing $pkg ...${NC}"
   cd /tmp || return 1
-  rm -f ${pkg}_*.ipk  # Clean up any previous downloads
+  rm -f ${pkg}_*.ipk ${pkg}.custom.ipk  # Clean up previous downloads
+
   # Download with retry logic
   retry=3
   while [ $retry -gt 0 ]; do
-    opkg download "$pkg"
-    # Check if download succeeded (exit code 0 AND file exists)
-    if [ $? -eq 0 ] && ls ${pkg}_*.ipk >/dev/null 2>&1; then
-      break
+    if [ -n "$url" ]; then
+      # Download from custom URL
+      echo "Using custom URL: $url"
+      if command -v uclient-fetch >/dev/null; then
+        uclient-fetch -O "${pkg}.custom.ipk" "$url"
+      elif command -v wget >/dev/null; then
+        wget -O "${pkg}.custom.ipk" "$url"
+      else
+        echo -e "${RED}No download tool (uclient-fetch/wget) found!${NC}"
+        return 1
+      fi
+
+      # Check if download succeeded
+      if [ $? -eq 0 ] && [ -s "${pkg}.custom.ipk" ]; then
+        break
+      fi
+    else
+      # Default opkg download
+      opkg download "$pkg"
+      if [ $? -eq 0 ] && ls ${pkg}_*.ipk >/dev/null 2>&1; then
+        break
+      fi
     fi
+
     retry=$((retry - 1))
     if [ $retry -gt 0 ]; then
       echo -e "${RED}Download failed for $pkg. ${retry} attempts remaining. Retrying...${NC}"
       sleep 5
     fi
   done
-  # Final verification after download attempts
-  if ! ls ${pkg}_*.ipk >/dev/null 2>&1; then
+
+  # Verify download
+  if [ -n "$url" ] && [ -s "${pkg}.custom.ipk" ]; then
+    ipk_file="${pkg}.custom.ipk"
+  elif ls ${pkg}_*.ipk >/dev/null 2>&1; then
+    ipk_file=$(ls -t ${pkg}_*.ipk | head -n1)
+  else
     echo -e "${RED}Failed to download $pkg after multiple attempts${NC}"
     return 1
   fi
+
   # Install package
-  ipk_file=$(ls -t ${pkg}_*.ipk | head -n1)
   opkg install "$ipk_file"
   install_status=$?
-  # Cleanup regardless of installation status
-  rm -f ${pkg}_*.ipk
+
+  # Cleanup
+  rm -f ${pkg}_*.ipk ${pkg}.custom.ipk
   if [ $install_status -ne 0 ]; then
     echo -e "${RED}Installation failed for $pkg${NC}"
   else
     echo -e "${GREEN}Successfully installed $pkg${NC}"
-  fi  
+  fi
   sleep 2
   return $install_status
 }
@@ -124,16 +153,11 @@ install_tmp() {
 # Main Install Sequence
 opkg remove dnsmasq
 install_tmp dnsmasq-full
-#install_tmp wget-ssl
-install_tmp luci-app-passwall2
+install_tmp luci-app-passwall2 "https://github.com/xiaorouji/openwrt-passwall2/releases/download/25.7.15-1/luci-24.10_luci-app-passwall2_25.7.15-r1_all.ipk" # EXAMPLE
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
-#install_tmp kmod-inet-diag
-#install_tmp kmod-netlink-diag
-#install_tmp sing-box
-#install_tmp hysteria
 
 # Function to verify installation
 verify_installation() {
