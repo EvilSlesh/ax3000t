@@ -18,10 +18,6 @@ Also compatible with similar OpenWrt-supported hardware.
 
 ### Direct Run from ssh
 ```bash
-rm -f set.sh && wget https://raw.githubusercontent.com/sadraimam/ax3000t/refs/heads/main/set.sh && chmod 777 set.sh && sh set.sh
-```
-### Run from RAM (Recommended, No Persistent Storage)
-```bash
 rm -f /tmp/set.sh && wget -O /tmp/set.sh https://raw.githubusercontent.com/sadraimam/ax3000t/refs/heads/main/set.sh && chmod +x /tmp/set.sh && sh /tmp/set.sh
 ```
 
