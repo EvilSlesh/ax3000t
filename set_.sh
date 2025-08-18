@@ -5,16 +5,17 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# root check
+#root check
 if [ "$(id -u)" -ne 0 ]; then
-  echo -e "${RED}This script must be run as root. Exiting.${NC}"
+  echo -e "${RED}This script must be run as root. Exiting. ${NC}"
   exit 1
 else
-  echo -e "${GREEN}Running as root...${NC}"
+  echo -e "${GREEN}Running as root... ${NC}"
+  sleep 2
   clear
 fi
 
-# Snapshot check
+#Snapshot check
 if grep -q SNAPSHOT /etc/openwrt_release; then
     echo -e "${YELLOW}SNAPSHOT Version Detected!${NC}"
     echo -e "${RED}Snapshot builds are not supported.${NC}"
@@ -25,21 +26,38 @@ fi
 
 # Initialize Network
 uci del network.wan.dns 2>/dev/null
+uci del network.wan6.dns 2>/dev/null
 uci set network.wan.peerdns="0"
+#uci set network.wan6.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="1.1.1.1"
+#uci add_list network.wan6.dns="2001:4860:4860::8844"
+#uci add_list network.wan6.dns="2606:4700:4700::1111"
 uci commit network
-/sbin/reload_config >/dev/null
-echo -e "${GREEN}Network Initialized!${NC}"
+/sbin/reload_config >/dev/null 
+echo -e "${GREEN}Current DNS:"
+echo "IPv4: $(uci get network.wan.dns)"
+#echo "IPv6: $(uci get network.wan6.dns)${NC}"
+echo -e "${GREEN}Network Initialized! ${NC}"
 
 # Initialize Time/Date
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
+uci delete system.ntp.server
+uci add_list system.ntp.server='ir.pool.ntp.org'
+uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
+uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
+
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
-ntpd -n -q -p
+ntpd -n -q -p ir.pool.ntp.org || {
+  echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
+  ntpd -n -q -p 0.openwrt.pool.ntp.org || {
+    echo -e "${RED}NTP sync failed again. Please check DNS/network.${NC}"
+  }
+}
 echo -e "${CYAN}$(date)${NC}"
 
 # Add Passwall Feeds
@@ -55,11 +73,6 @@ for feed in passwall_luci passwall_packages passwall2; do
 done
 echo -e "${GREEN}Feed Updated!${NC}"
 
-# Wait for opkg lock before update
-while pgrep opkg >/dev/null 2>&1; do
-    echo -e "${YELLOW}Waiting for opkg lock...${NC}"
-    sleep 2
-done
 echo -e "${YELLOW}Updating Packages...${NC}"
 opkg update
 
@@ -73,8 +86,7 @@ install_tmp() {
   fi
   echo -e "${YELLOW}Installing $pkg ...${NC}"
   cd /tmp || return 1
-  rm -f *.ipk  # Clean up any previous downloads
-  #rm -f ${pkg}_*.ipk
+  rm -f ${pkg}_*.ipk  # Clean up any previous downloads
   # Download with retry logic
   retry=3
   while [ $retry -gt 0 ]; do
@@ -98,9 +110,8 @@ install_tmp() {
   ipk_file=$(ls -t ${pkg}_*.ipk | head -n1)
   opkg install "$ipk_file"
   install_status=$?
-  # Aggressive cleanup after install
-  rm -f *.ipk
-  #rm -f ${pkg}_*.ipk
+  # Cleanup regardless of installation status
+  rm -f ${pkg}_*.ipk
   if [ $install_status -ne 0 ]; then
     echo -e "${RED}Installation failed for $pkg${NC}"
   else
@@ -110,35 +121,19 @@ install_tmp() {
   return $install_status
 }
 
-opkg remove \
-    odhcp6c \
-    odhcpd-ipv6only \
-    ip6tables kmod-ip6tables \
-    kmod-ppp \
-    kmod-pppoe \
-    kmod-pppox \
-    ppp \
-    ppp-mod-pppoe \
-    ppp-mod-pptp \
-    ppp-mod-pppol2tp \
-    wpad-openssl \
-    kmod-usb-core \
-    kmod-usb2 \
-    kmod-usb3 \
-    kmod-usb-storage
 # Main Install Sequence
-install_tmp luci-app-passwall2
-install_tmp sing-box
-install_tmp hysteria
 opkg remove dnsmasq
 install_tmp dnsmasq-full
+#install_tmp wget-ssl
+install_tmp luci-app-passwall2
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
-#install_tmp wget-ssl
 #install_tmp kmod-inet-diag
 #install_tmp kmod-netlink-diag
+#install_tmp sing-box
+#install_tmp hysteria
 
 # Function to verify installation
 verify_installation() {
@@ -155,8 +150,8 @@ verify_installation() {
 verify_installation "dnsmasq-full" "/usr/lib/opkg/info/dnsmasq-full.control"
 verify_installation "Passwall2" "/etc/init.d/passwall2"
 verify_installation "XRAY" "/usr/bin/xray"
-verify_installation "Sing-box" "/usr/bin/sing-box"
-verify_installation "Hysteria" "/usr/bin/hysteria"
+#verify_installation "Sing-box" "/usr/bin/sing-box"
+#verify_installation "Hysteria" "/usr/bin/hysteria"
 
 # Passwall Patch
 wget -O /tmp/status.htm https://raw.githubusercontent.com/sadraimam/ax3000t/refs/heads/main/status.htm
@@ -166,25 +161,24 @@ echo "/usr/lib/lua/luci/view/passwall2/global/status.htm" >> /lib/upgrade/keep.d
 rm -f /tmp/status.htm
 echo -e "${GREEN}** Passwall Patched ** ${NC}"
 
-# Passwall2 Settings (IPv4 always, IPv6 only if detected)
+# Passwall2 Settings
 uci set passwall2.@global_forwarding[0]=global_forwarding
 uci set passwall2.@global_forwarding[0].tcp_no_redir_ports='disable'
 uci set passwall2.@global_forwarding[0].udp_no_redir_ports='disable'
 uci set passwall2.@global_forwarding[0].tcp_redir_ports='1:65535'
 uci set passwall2.@global_forwarding[0].udp_redir_ports='1:65535'
 uci set passwall2.@global[0].remote_dns='8.8.4.4'
-if [ $HAS_IPV6 -eq 1 ]; then
-    uci set passwall2.@global[0].remote_dns_ipv6='https://dns.google/dns-query'
-fi
+uci set passwall2.@global[0].remote_dns_ipv6='https://dns.google/dns-query'
 
-uci -q delete passwall2.GooglePlay
-uci -q delete passwall2.Netflix
-uci -q delete passwall2.OpenAI
-uci -q delete passwall2.China
-uci -q delete passwall2.QUIC
-uci -q delete passwall2.Proxy
-uci -q delete passwall2.UDP
-uci -q delete passwall2.@global_subscribe[0].filter_discard_list
+  # Delete unused rules and sub
+uci delete passwall2.GooglePlay
+uci delete passwall2.Netflix
+uci delete passwall2.OpenAI
+uci delete passwall2.China
+uci delete passwall2.QUIC
+uci delete passwall2.Proxy
+uci delete passwall2.UDP
+uci delete passwall2.@global_subscribe[0].filter_discard_list
 
 uci set passwall2.myshunt.Direct='_direct'
 uci set passwall2.myshunt.DirectGame='_direct'
@@ -194,6 +188,7 @@ uci set passwall2.Direct=shunt_rules
 uci set passwall2.Direct.remarks='IRAN'
 uci set passwall2.Direct.network='tcp,udp'
 
+  # Optimized IP List (includes geoip:ir + all private/special ranges)
 uci set passwall2.Direct.ip_list='geoip:ir
 0.0.0.0/8
 10.0.0.0/8
@@ -224,6 +219,7 @@ fc00::/7
 fe80::/10
 ff00::/8'
 
+  # Improved Domain List: geo-based + known local portals
 uci set passwall2.Direct.domain_list='geosite:ir
 geosite:category-ir
 full:my.irancell.ir
@@ -232,18 +228,19 @@ full:login.tci.ir
 full:local.tci.ir
 regexp:^.+\.ir$'
 
+  # Save and apply
 uci commit passwall2
-echo -e "${GREEN}** Passwall Configured **${NC}"
+echo -e "${GREEN}** Passwall Configured ** ${NC}"
 
 # DNS Rebind Fix
 uci set dhcp.@dnsmasq[0].rebind_domain='my.irancell.ir my.mci.ir login.tci.ir local.tci.ir 192.168.1.1.mci 192.168.1.1.irancell'
 uci commit dhcp
 /etc/init.d/dnsmasq restart
-echo -e "${GREEN}** DNS Rebind Fixed **${NC}"
+echo -e "${GREEN}** DNS Rebind Fixed ** ${NC}"
 
-rm -f "$0"
+rm -f /root/set.sh
 /sbin/reload_config
-echo -e "${CYAN}** Installation Completed **${NC}"
+echo -e "${CYAN}** Installation Completed ** ${NC}"
 
 # Set Wifi
 uci set wireless.radio0.cell_density='0'
@@ -258,16 +255,17 @@ uci set wireless.default_radio1.ocv='0'
 uci set wireless.radio1.disabled='0'
 uci commit wireless
 wifi reload
-echo -e "${GREEN}** Wifi Configured **${NC}"
+echo -e "${GREEN}** Wifi Configured ** ${NC}"
 
 # Set Root Password
 (echo "123456789"; echo "123456789") | passwd root >/dev/null 2>&1 || sed -i '/^root:/s|:[^:]*|:$5$S5bxda0buJo3RfO4$soovbPY4JGEbfMmggEPdo9mW/1qkTaAgVn9bbAfJeD7|' /etc/shadow
-echo -e "${CYAN}** Root password is set: 123456789 **${NC}"
+echo -e "${CYAN}** Root password is set: 123456789 ** ${NC}"
 
 # Reboot or Exit
 while true; do
     printf "${YELLOW}Press [r] to reboot or [e] to exit: ${NC}"
     read -rsn1 input
+    
     case "$input" in
         r|R)
             echo -e "${GREEN}\nRebooting system...${NC}"
