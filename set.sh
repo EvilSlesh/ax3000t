@@ -28,16 +28,12 @@ fi
 uci del network.wan.dns 2>/dev/null
 uci del network.wan6.dns 2>/dev/null
 uci set network.wan.peerdns="0"
-#uci set network.wan6.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="1.1.1.1"
-#uci add_list network.wan6.dns="2001:4860:4860::8844"
-#uci add_list network.wan6.dns="2606:4700:4700::1111"
 uci commit network
 /sbin/reload_config >/dev/null 
 echo -e "${GREEN}Current DNS:"
 echo "IPv4: $(uci get network.wan.dns)"
-#echo "IPv6: $(uci get network.wan6.dns)${NC}"
 echo -e "${GREEN}Network Initialized! ${NC}"
 
 # Initialize Time/Date
@@ -160,6 +156,8 @@ install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_aarch64_cortex-a53.ipk"
 install_tmp hysteria
+#install_tmp kmod-inet-diag
+#install_tmp kmod-netlink-diag
 
 # Function to verify installation
 verify_installation() {
