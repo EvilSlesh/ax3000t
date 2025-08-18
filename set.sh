@@ -48,7 +48,7 @@ uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
-
+  # NTP Sync
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
 ntpd -n -q -p ir.pool.ntp.org || {
   echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
@@ -71,6 +71,7 @@ for feed in passwall_luci passwall_packages passwall2; do
 done
 echo -e "${GREEN}Feed Updated!${NC}"
 
+# Main install
 echo -e "${YELLOW}Updating Packages...${NC}"
 opkg update
 
@@ -205,7 +206,7 @@ uci set passwall2.myshunt.DirectGame='_direct'
 uci set passwall2.myshunt.remarks='MainShunt'
 
 uci set passwall2.Direct=shunt_rules
-uci set passwall2.Direct.remarks='IRAN'
+uci set passwall2.Direct.remarks='IRAN' #Remove: not needed
 uci set passwall2.Direct.network='tcp,udp'
 
   # Optimized IP List (includes geoip:ir + all private/special ranges)
