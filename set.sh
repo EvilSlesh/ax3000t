@@ -158,6 +158,8 @@ install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.
 install_tmp hysteria
 #install_tmp kmod-inet-diag
 #install_tmp kmod-netlink-diag
+opkg --force-overwrite upgrade sing-box
+opkg --force-overwrite upgrade luci-app-passwall2
 
 # Function to verify installation
 verify_installation() {
