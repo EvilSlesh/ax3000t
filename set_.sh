@@ -108,7 +108,6 @@ install_tmp() {
   opkg install "$ipk_file"
   install_status=$?
   # Aggressive cleanup after install
-  #rm -rf /tmp/*.ipk /tmp/opkg-lists/* /tmp/opkg-*.tmp
   rm -rf /tmp/*.ipk /tmp/opkg-*.tmp
   [ -d /var/cache/opkg ] && rm -rf /var/cache/opkg/*
   [ -d /var/lock ] && rm -rf /var/lock/*
@@ -125,12 +124,12 @@ install_tmp() {
 }
 
 # Main Install Sequence
+#install_tmp wget-ssl
+install_tmp luci-app-passwall2
+install_tmp sing-box
+install_tmp hysteria
 opkg remove dnsmasq
 install_tmp dnsmasq-full
-#install_tmp wget-ssl
-install_tmp sing-box
-install_tmp luci-app-passwall2
-install_tmp hysteria
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
