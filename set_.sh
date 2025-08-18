@@ -111,7 +111,6 @@ install_tmp() {
 }
 
 # Main Install Sequence
-#install_tmp wget-ssl
 install_tmp luci-app-passwall2
 install_tmp sing-box
 install_tmp hysteria
@@ -121,6 +120,7 @@ install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
+#install_tmp wget-ssl
 #install_tmp kmod-inet-diag
 #install_tmp kmod-netlink-diag
 
