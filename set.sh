@@ -33,11 +33,11 @@ uci add_list network.wan.dns="1.0.0.1"
 uci add_list network.wan.dns="1.1.1.1"
 uci commit network
 /sbin/reload_config >/dev/null 
-echo -e "${GREEN}Current DNS:"
-echo "IPv4: $(uci get network.wan.dns)"
-echo -e "${GREEN}Network Initialized! ${NC}"
+echo -e "${CYAN}Current DNS:${NC}"
+echo -e "${CYAN}IPv4: $(uci get network.wan.dns)${NC}"
+echo -e "${GREEN}Network Initialized!${NC}"
 
-# Wait for Internet
+# Internet check
 until ping -c1 -W1 8.8.8.8 >/dev/null 2>&1; do
     echo -e "${YELLOW}Waiting for Internet...${NC}"
     sleep 2
@@ -58,7 +58,6 @@ echo -e "${GREEN}Time/Date Initialized! ${NC}"
 
 # Force NTP Sync
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
-#/usr/sbin/sysntpd -n -q -p 0.asia.pool.ntp.org
 /etc/init.d/sysntpd stop
 ntpd -n -q -p 0.asia.pool.ntp.org || {
   echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
