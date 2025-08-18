@@ -4,6 +4,7 @@ Automated configuration script for setting up Passwall2 on the Xiaomi AX3000T ru
 Also compatible with similar OpenWrt-supported hardware.
 
 ## Features
+- Advanced custom package installer using /tmp and retry donwload logic with custom url option
 - Installs and configures Passwall2 with recommended defaults.
 - Sets up optimized DNS and network settings
 - Configures WiFi with secure defaults
