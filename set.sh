@@ -28,16 +28,16 @@ fi
 uci del network.wan.dns 2>/dev/null
 uci del network.wan6.dns 2>/dev/null
 uci set network.wan.peerdns="0"
-uci set network.wan6.peerdns="0"
+#uci set network.wan6.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="1.1.1.1"
-uci add_list network.wan6.dns="2001:4860:4860::8844"
-uci add_list network.wan6.dns="2606:4700:4700::1111"
+#uci add_list network.wan6.dns="2001:4860:4860::8844"
+#uci add_list network.wan6.dns="2606:4700:4700::1111"
 uci commit network
 /sbin/reload_config >/dev/null 
 echo -e "${GREEN}Current DNS:"
 echo "IPv4: $(uci get network.wan.dns)"
-echo "IPv6: $(uci get network.wan6.dns)${NC}"
+#echo "IPv6: $(uci get network.wan6.dns)${NC}"
 echo -e "${GREEN}Network Initialized! ${NC}"
 
 # Initialize Time/Date
@@ -124,7 +124,7 @@ install_tmp() {
 # Main Install Sequence
 opkg remove dnsmasq
 install_tmp dnsmasq-full
-install_tmp wget-ssl
+#install_tmp wget-ssl
 install_tmp luci-app-passwall2
 install_tmp ipset
 install_tmp kmod-tun
@@ -132,8 +132,8 @@ install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
 #install_tmp kmod-inet-diag
 #install_tmp kmod-netlink-diag
-install_tmp sing-box
-install_tmp hysteria
+#install_tmp sing-box
+#install_tmp hysteria
 
 # Function to verify installation
 verify_installation() {
@@ -150,8 +150,8 @@ verify_installation() {
 verify_installation "dnsmasq-full" "/usr/lib/opkg/info/dnsmasq-full.control"
 verify_installation "Passwall2" "/etc/init.d/passwall2"
 verify_installation "XRAY" "/usr/bin/xray"
-verify_installation "Sing-box" "/usr/bin/sing-box"
-verify_installation "Hysteria" "/usr/bin/hysteria"
+#verify_installation "Sing-box" "/usr/bin/sing-box"
+#verify_installation "Hysteria" "/usr/bin/hysteria"
 
 # Passwall Patch
 wget -O /tmp/status.htm https://raw.githubusercontent.com/sadraimam/ax3000t/refs/heads/main/status.htm
