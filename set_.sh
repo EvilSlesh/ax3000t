@@ -24,28 +24,28 @@ else
 fi
 
 # Detect IPv6 availability
-HAS_IPV6=0
-if ip -6 addr show scope global | grep -q 'inet6'; then
-    HAS_IPV6=1
-    echo -e "${GREEN}IPv6 detected.${NC}"
-else
-    echo -e "${YELLOW}No IPv6 detected.${NC}"
-    # Disable IPv6 firewall rules
-    uci set firewall.@defaults[0].disable_ipv6=1
-    uci commit firewall
-fi
+#HAS_IPV6=0
+#if ip -6 addr show scope global | grep -q 'inet6'; then
+#    HAS_IPV6=1
+#    echo -e "${GREEN}IPv6 detected.${NC}"
+#else
+#    echo -e "${YELLOW}No IPv6 detected.${NC}"
+#    # Disable IPv6 firewall rules
+#    uci set firewall.@defaults[0].disable_ipv6=1
+#    uci commit firewall
+#fi
 
 # Initialize Network
 uci del network.wan.dns 2>/dev/null
 uci set network.wan.peerdns="0"
 uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="1.1.1.1"
-if [ $HAS_IPV6 -eq 1 ]; then
-    uci del network.wan6.dns 2>/dev/null
-    uci set network.wan6.peerdns="0"
-    uci add_list network.wan6.dns="2001:4860:4860::8844"
-    uci add_list network.wan6.dns="2606:4700:4700::1111"
-fi
+#if [ $HAS_IPV6 -eq 1 ]; then
+#    uci del network.wan6.dns 2>/dev/null
+#    uci set network.wan6.peerdns="0"
+#    uci add_list network.wan6.dns="2001:4860:4860::8844"
+#    uci add_list network.wan6.dns="2606:4700:4700::1111"
+#fi
 uci commit network
 /sbin/reload_config >/dev/null
 echo -e "${GREEN}Network Initialized!${NC}"
@@ -53,21 +53,21 @@ echo -e "${GREEN}Network Initialized!${NC}"
 # Initialize Time/Date
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
-uci delete system.ntp.server
-uci add_list system.ntp.server='ir.pool.ntp.org'
-uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
-uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
+#uci delete system.ntp.server
+#uci add_list system.ntp.server='ir.pool.ntp.org'
+#uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
+#uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
 
-echo -e "${YELLOW}Syncing time with NTP...${NC}"
-ntpd -n -q -p ir.pool.ntp.org || {
-  echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
+#echo -e "${YELLOW}Syncing time with NTP...${NC}"
+#ntpd -n -q -p ir.pool.ntp.org || {
+#  echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
   ntpd -n -q -p 0.openwrt.pool.ntp.org || {
     echo -e "${RED}NTP sync failed again. Please check DNS/network.${NC}"
-  }
-}
+#  }
+#}
 echo -e "${CYAN}$(date)${NC}"
 
 # Add Passwall Feeds
@@ -145,10 +145,10 @@ install_tmp() {
 # Main Install Sequence
 opkg remove dnsmasq
 install_tmp dnsmasq-full
-install_tmp wget-ssl
+#install_tmp wget-ssl
 install_tmp sing-box
-install_tmp hysteria
 install_tmp luci-app-passwall2
+install_tmp hysteria
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
