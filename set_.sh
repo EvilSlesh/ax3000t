@@ -73,8 +73,8 @@ install_tmp() {
   fi
   echo -e "${YELLOW}Installing $pkg ...${NC}"
   cd /tmp || return 1
-  rm -f *.ipk
-  rm -rf opkg-*
+  rm -f *.ipk  # Clean up any previous downloads
+  #rm -f ${pkg}_*.ipk
   # Download with retry logic
   retry=3
   while [ $retry -gt 0 ]; do
@@ -99,8 +99,7 @@ install_tmp() {
   opkg install "$ipk_file"
   install_status=$?
   # Aggressive cleanup after install
-  rm -f /tmp/*.ipk
-  rm -rf /tmp/opkg-*
+  rm -f *.ipk
   #rm -f ${pkg}_*.ipk
   if [ $install_status -ne 0 ]; then
     echo -e "${RED}Installation failed for $pkg${NC}"
@@ -111,7 +110,6 @@ install_tmp() {
   return $install_status
 }
 
-rm -rf /usr/lib/opkg/info/*.postinst* /usr/lib/opkg/info/*.prerm* /usr/lib/opkg/info/*.sh
 # Main Install Sequence
 #install_tmp wget-ssl
 install_tmp luci-app-passwall2
