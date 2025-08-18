@@ -61,7 +61,7 @@ echo -e "${GREEN}WAN is up.${NC}"
 uci set system.@system[0].zonename='Asia/Tehran'
 uci set system.@system[0].timezone='<+0330>-3:30'
 uci delete system.ntp.server
-uci add_list system.ntp.server='ir.pool.ntp.org'
+uci add_list system.ntp.server='0.ir.pool.ntp.org'
 uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
 uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
@@ -69,7 +69,7 @@ uci commit system
 echo -e "${GREEN}Time/Date Initialized!${NC}"
 
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
-ntpd -n -q -p ir.pool.ntp.org || {
+ntpd -n -q -p 0.ir.pool.ntp.org || {
   echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
   ntpd -n -q -p 0.openwrt.pool.ntp.org || {
     echo -e "${RED}NTP sync failed again. Please check DNS/network.${NC}"
@@ -133,7 +133,8 @@ install_tmp() {
   opkg install "$ipk_file"
   install_status=$?
   # Aggressive cleanup after install
-  rm -rf /tmp/*.ipk /tmp/opkg-lists/* /tmp/opkg-*.tmp
+  #rm -rf /tmp/*.ipk /tmp/opkg-lists/* /tmp/opkg-*.tmp
+  rm -rf /tmp/*.ipk /tmp/opkg-*.tmp
   [ -d /var/cache/opkg ] && rm -rf /var/cache/opkg/*
   [ -d /var/lock ] && rm -rf /var/lock/*
   sync
