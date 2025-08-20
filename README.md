@@ -3,8 +3,8 @@ Automated configuration script for setting up Passwall2 on the Xiaomi AX3000T ru
 Also compatible with similar OpenWrt-supported hardware. Minimum hardware profile:
 - Flash 128MB
 - RAM 256MB
-Note:
-On Xiaomi AX3000T, factory partitioning results in an overlay size of ~60 MB, compared to ~90 MB available on similar routers.
+
+- Note: On Xiaomi AX3000T, factory partitioning results in an overlay size of ~60 MB, compared to ~90 MB available on similar routers.
   
 ## Installation
 ### Run from ssh
