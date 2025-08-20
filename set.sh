@@ -165,6 +165,7 @@ install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.
 install_tmp hysteria
 sleep 2
 opkg --force-overwrite upgrade luci-app-passwall2
+# opkg install --force-reinstall /path/to/sing-box_<version>_<arch>.ipk
 
 # Function to verify installation
 verify_installation() {
