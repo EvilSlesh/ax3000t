@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Passwall2-style Manual Sing-Box Updater
+# Passwall2-style Manual App Updater
 APP_NAME="sing-box" # Change to 'xray', 'v2ray', etc. if needed
 
 # Detect Architecture
