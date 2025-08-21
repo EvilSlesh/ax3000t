@@ -91,7 +91,7 @@ install_tmp() {
   url="$2"  # Optional custom download URL
   # Check if package is already installed
   if opkg list-installed | grep -q "^$pkg - "; then
-    echo -e "${GREEN}$pkg is already installed. Skipping.${NC}"
+    echo -e "${YELLOW}$pkg is already installed. Skipping.${NC}"
     return 0
   fi
   echo -e "${YELLOW}Installing $pkg ...${NC}"
@@ -102,7 +102,7 @@ install_tmp() {
   while [ $retry -gt 0 ]; do
     if [ -n "$url" ]; then
       # Download from custom URL
-      echo "Using custom URL: $url"
+      echo -e "${YELLOW}Using custom URL:${NC} $url"
       if command -v uclient-fetch >/dev/null; then
         uclient-fetch -O "${pkg}.custom.ipk" "$url"
       elif command -v wget >/dev/null; then
