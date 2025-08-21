@@ -31,10 +31,17 @@ uci add_list network.wan.dns="8.8.4.4"
 uci add_list network.wan.dns="8.8.8.8"
 uci add_list network.wan.dns="1.0.0.1"
 uci add_list network.wan.dns="1.1.1.1"
+uci del network.wan6.dns 2>/dev/null
+uci set network.wan6.peerdns="0"
+uci add_list network.wan6.dns="2001:4860:4860::8844"
+uci add_list network.wan6.dns="2001:4860:4860::8888"
+uci add_list network.wan6.dns="2606:4700:4700::1001"
+uci add_list network.wan6.dns="2606:4700:4700::1111"
 uci commit network
 /sbin/reload_config >/dev/null 
 echo -e "${CYAN}Current DNS:${NC}"
 echo -e "${CYAN}IPv4: $(uci get network.wan.dns)${NC}"
+echo -e "${CYAN}IPv6: $(uci get network.wan6.dns)${NC}"
 echo -e "${GREEN}Network Initialized!${NC}"
 
 # Internet check
@@ -297,7 +304,6 @@ echo -e "${CYAN}** Root password is set: 123456789 ** ${NC}"
 while true; do
     printf "${YELLOW}Press [r] to reboot or [e] to exit: ${NC}"
     read -rsn1 input
-    
     case "$input" in
         r|R)
             echo -e "${GREEN}\nRebooting system...${NC}"
