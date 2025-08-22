@@ -168,9 +168,8 @@ install_tmp kmod-nft-socket
 #install_tmp sing-box #latest version issue due to storage limit
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_${ARCH}.ipk"
 install_tmp hysteria
-sleep 2
 opkg --force-overwrite upgrade luci-app-passwall2
-opkg --force-overwrite --force-space upgrade sing-box
+#opkg --force-overwrite --force-space upgrade sing-box
 #opkg install --force-reinstall sing-box
 
 # Function to verify installation
