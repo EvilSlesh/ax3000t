@@ -62,6 +62,7 @@ uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
 /etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
+sleep 2
 
 # Force NTP Sync
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
