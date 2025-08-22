@@ -60,21 +60,21 @@ uci add_list system.ntp.server='1.asia.pool.ntp.org'
 uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
 uci add_list system.ntp.server='1.openwrt.pool.ntp.org'
 uci commit system
-/etc/init.d/system reload
+/etc/init.d/sysntpd restart
 echo -e "${GREEN}Time/Date Initialized! ${NC}"
 
 # Force NTP Sync
 echo -e "${YELLOW}Syncing time with NTP...${NC}"
-/etc/init.d/sysntpd stop
+#/etc/init.d/sysntpd stop
 ntpd -n -q -p 0.asia.pool.ntp.org || {
   echo -e "${RED}NTP sync failed! Retrying with global pool...${NC}"
   ntpd -n -q -p 0.openwrt.pool.ntp.org || {
     echo -e "${RED}NTP sync failed again. Please check DNS/network.${NC}"
   }
 }
-/etc/init.d/sysntpd start
+#/etc/init.d/sysntpd start
 echo -e "${CYAN}Current system time: $(date)${NC}"
-
+exit 1
 # Add Passwall Feeds
 wget -O /tmp/passwall.pub https://master.dl.sourceforge.net/project/openwrt-passwall-build/passwall.pub
 opkg-key add /tmp/passwall.pub
