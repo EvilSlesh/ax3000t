@@ -172,8 +172,9 @@ sleep 2
 opkg --force-overwrite upgrade luci-app-passwall2
 cd /tmp
 opkg download sing-box
-opkg --force-overwrite upgrade sing-box
-# opkg install --force-reinstall /path/to/sing-box_<version>_<arch>.ipk
+ipk_file=$(ls -t ${pkg}_*.ipk | head -n1)
+opkg --force-overwrite upgrade $ipk_file
+#opkg install --force-reinstall sing-box
 
 # Function to verify installation
 verify_installation() {
