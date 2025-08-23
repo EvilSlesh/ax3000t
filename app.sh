@@ -1,55 +1,160 @@
 #!/bin/sh
 
-# Passwall2-style Manual App Updater
-APP_NAME="sing-box" # Change to 'xray', 'v2ray', etc. if needed
+# --------- CONFIGURATION ---------
+LUCIBASE="http://127.0.0.1/cgi-bin/luci"
+TMP_DIR="/tmp"
+TMP_RESPONSE="${TMP_DIR}/api_response.json"
 
-# Detect Architecture
-APP_ARCH=$(uci get passwall2.@global[0].arch 2>/dev/null)
-if [ -z "$APP_ARCH" ]; then
-    APP_ARCH=$(opkg print-architecture | awk '{print $2}' | head -1)
-fi
-BASE_URL="https://master.dl.sourceforge.net/project/openwrt-passwall-bin/packages/$APP_ARCH"
+# List of Passwall2 apps that can be updated
+AVAILABLE_APPS="xray sing-box v2ray hysteria naiveproxy tuic"
 
-echo "> Architecture: $APP_ARCH"
-echo "> Target: $APP_NAME"
+# --------- FUNCTIONS ---------
+log_message() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
 
-# Check Versions
-SERVER_VERSION=$(curl -fsL "$BASE_URL/$APP_NAME/version" | head -n1)
-CURRENT_VERSION=$($(which $APP_NAME) version 2>/dev/null | head -n1 | awk '{print $2}' || echo "0")
-echo "> Server: $SERVER_VERSION"
-echo "> Current: ${CURRENT_VERSION:-Not Found}"
+die() {
+    log_message "ERROR: $1"
+    exit 1
+}
 
-if [ "$SERVER_VERSION" = "$CURRENT_VERSION" ]; then
-    echo "✓ Already up-to-date." && exit 0
-fi
-echo "! Update found."
+# Get LuCI token from local system
+get_luci_token() {
+    # Try to extract token from current LuCI session if available
+    local token=$(uci get luci._token 2>/dev/null)
+    
+    # Fallback: get token from LuCI homepage
+    if [ -z "$token" ]; then
+        token=$(curl -s "$LUCIBASE" | grep -o 'token=[^"]*' | head -n1 | cut -d= -f2)
+    fi
+    
+    if [ -z "$token" ]; then
+        die "Failed to obtain LuCI token"
+    fi
+    
+    echo "$token"
+}
 
-# Setup Temp Directory
-TMP_DIR=$(mktemp -d)
-cd "$TMP_DIR" || exit 1
+# Make API request function
+make_api_request() {
+    local endpoint="$1"
+    local params="$2"
+    local token=$(get_luci_token)
+    local url="$LUCIBASE/admin/services/passwall2/$endpoint?token=$token&$params"
+    
+    curl -s "$url" > "$TMP_RESPONSE"
+    
+    if [ $? -ne 0 ]; then
+        die "API request to $endpoint failed"
+    fi
+    
+    # Check if response indicates success
+    if grep -q '"success":true' "$TMP_RESPONSE" || ! grep -q '"success":false' "$TMP_RESPONSE"; then
+        cat "$TMP_RESPONSE"
+        return 0
+    else
+        log_message "API response: $(cat "$TMP_RESPONSE")"
+        return 1
+    fi
+}
 
-# Download and Verify
-echo "> Downloading from $BASE_URL..."
-curl -fsL -o "./$APP_NAME.tar.gz" "$BASE_URL/$APP_NAME/$APP_NAME-$SERVER_VERSION.tar.gz"
-curl -fsL -o "./sha256sums" "$BASE_URL/$APP_NAME/sha256sums"
-
-if ! sha256sum -c --ignore-missing sha256sums; then
-    echo "! Checksum mismatch. Aborting." >&2
-    rm -rf "$TMP_DIR"
+# --------- MAIN SCRIPT ---------
+# Check if command is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <command> [appname]"
+    echo "Commands:"
+    echo "  update <appname>     - Update a specific app ($AVAILABLE_APPS)"
+    echo "  update-all           - Update all available apps"
+    echo "  status               - Get Passwall2 status"
+    echo "  log [lines]          - Get recent logs (default: 50 lines)"
+    echo "  restart              - Restart Passwall2 service"
+    echo "  subscribe            - Update subscriptions"
+    echo "  get-config           - Get current configuration"
     exit 1
 fi
-echo "✓ Checksum valid."
 
-# Install
-echo "> Installing..."
-tar -xzf "$APP_NAME.tar.gz"
-/etc/init.d/passwall2 stop
-/etc/init.d/"$APP_NAME" stop 2>/dev/null
-mv "$(which $APP_NAME)" "$(which $APP_NAME)".bak 2>/dev/null
-install -m 755 "./$APP_NAME" "/usr/bin/"
-/etc/init.d/"$APP_NAME" start 2>/dev/null
-/etc/init.d/passwall2 start
+COMMAND="$1"
+APPNAME="$2"
+LINES="${3:-50}"  # Default to 50 lines for log command
 
-# Final Check
-echo "✓ Done. Final version: $($(which $APP_NAME) version | head -n1)"
-rm -rf "$TMP_DIR"
+case "$COMMAND" in
+    update)
+        if [ -z "$APPNAME" ]; then
+            die "App name required for update. Available apps: $AVAILABLE_APPS"
+        fi
+        
+        # Verify app is valid
+        if ! echo "$AVAILABLE_APPS" | grep -qw "$APPNAME"; then
+            die "Invalid app name. Available apps: $AVAILABLE_APPS"
+        fi
+        
+        log_message "Getting download info for $APPNAME..."
+        app_info=$(make_api_request "get_${APPNAME}_info")
+        
+        DLURL=$(echo "$app_info" | grep -o '"url":"[^"]*"' | head -n1 | cut -d'"' -f4)
+        SIZE=$(echo "$app_info" | grep -o '"size":"[^"]*"' | head -n1 | cut -d'"' -f4)
+        
+        if [ -z "$DLURL" ] || [ -z "$SIZE" ]; then
+            die "Could not get download info for $APPNAME"
+        fi
+        
+        log_message "Triggering update for $APPNAME..."
+        update_result=$(make_api_request "update_${APPNAME}" "url=$DLURL&size=$SIZE")
+        log_message "Update triggered: $update_result"
+        ;;
+
+    update-all)
+        log_message "Updating all available apps..."
+        for app in $AVAILABLE_APPS; do
+            log_message "Processing $app..."
+            app_info=$(make_api_request "get_${app}_info")
+            
+            DLURL=$(echo "$app_info" | grep -o '"url":"[^"]*"' | head -n1 | cut -d'"' -f4)
+            SIZE=$(echo "$app_info" | grep -o '"size":"[^"]*"' | head -n1 | cut -d'"' -f4)
+            
+            if [ -n "$DLURL" ] && [ -n "$SIZE" ]; then
+                update_result=$(make_api_request "update_$app" "url=$DLURL&size=$SIZE")
+                log_message "$app update: $update_result"
+            else
+                log_message "Skipping $app - no update available"
+            fi
+        done
+        ;;
+
+    status)
+        log_message "Getting Passwall2 status..."
+        status=$(make_api_request "status")
+        echo "Status: $status"
+        ;;
+
+    log)
+        log_message "Getting last $LINES lines of logs..."
+        logs=$(make_api_request "get_log" "lines=$LINES")
+        echo "Logs: $logs"
+        ;;
+
+    restart)
+        log_message "Restarting Passwall2 service..."
+        result=$(make_api_request "restart")
+        log_message "Restart result: $result"
+        ;;
+
+    subscribe)
+        log_message "Updating subscriptions..."
+        result=$(make_api_request "subscribe")
+        log_message "Subscription update result: $result"
+        ;;
+
+    get-config)
+        log_message "Retrieving configuration..."
+        config=$(make_api_request "get_config")
+        echo "Configuration: $config"
+        ;;
+
+    *)
+        die "Unknown command: $COMMAND"
+        ;;
+esac
+
+log_message "Operation completed successfully"
+rm -f "$TMP_RESPONSE"
