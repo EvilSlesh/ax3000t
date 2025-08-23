@@ -4,7 +4,7 @@ Also compatible with similar OpenWrt-supported hardware. Minimum hardware profil
 - Flash 128MB
 - RAM 256MB
  
-- Note: On Xiaomi AX3000T, factory partitioning results in an overlay size of ~60 MB, compared to ~90 MB available on similar routers. The script is optimized to work with limited storage space.
+- Note: On Xiaomi AX3000T, factory partitioning results in an overlay size of ~60 MB, compared to ~90 MB available on similar routers. The script is optimized to work with limited storage space. To regain more free space you will need to modify factory partitioning using UART or direct flash the ROM chip (not recommanded), and recovering original firmware is only possible by mentioned methods.
   
 ## Installation
 ### Run from ssh
