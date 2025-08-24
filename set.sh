@@ -159,18 +159,14 @@ ARCH=$(opkg print-architecture | grep -E 'aarch64|arm|mips|x86' | awk '{print $2
 # Main Install Sequence
 opkg remove dnsmasq
 install_tmp dnsmasq-full
-#install_tmp luci-app-passwall2 #latest version issue due to storage limit
 install_tmp luci-app-passwall2 "https://github.com/xiaorouji/openwrt-passwall2/releases/download/25.7.15-1/luci-24.10_luci-app-passwall2_25.7.15-r1_all.ipk"
 install_tmp ipset
 install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
-#install_tmp sing-box #latest version issue due to storage limit
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_${ARCH}.ipk"
 install_tmp hysteria
 opkg --force-overwrite upgrade luci-app-passwall2
-#opkg --force-overwrite upgrade sing-box #--force-space
-#opkg install --force-reinstall sing-box
 
 # Function to verify installation
 verify_installation() {
