@@ -3,7 +3,7 @@
 
 LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 USER="root"
-PASS="YOURPASSWORD"
+PASS="123456789"
 APPS="xray sing-box hysteria"
 
 # login and grab sysauth cookie
