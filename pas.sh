@@ -1,9 +1,9 @@
 #!/bin/sh
 # Passwall2 core updater (latest OpenWrt + Passwall2 only)
 
-LUCIBASE="http://192.168.1.1/cgi-bin/luci"
+LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 APPS="xray sing-box hysteria"
-AUTH="root:123456789"
+AUTH="root:123456789"   # replace YOURPASSWORD
 
 for app in $APPS; do
     INFO=$(curl -s -u $AUTH "$LUCIBASE/admin/services/passwall2/get_${app}_info")
