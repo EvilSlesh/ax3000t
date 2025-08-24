@@ -3,7 +3,7 @@
 
 LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 USER="root"
-PASS="YOURPASSWORD"
+PASS="123456789"
 
 COOKIE=$(curl -s -i -d "luci_username=$USER&luci_password=$PASS" \
     $LUCIBASE/admin/passwall2 | grep -o 'sysauth=[^;]*')
