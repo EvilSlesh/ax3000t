@@ -1,17 +1,20 @@
 #!/bin/sh
-# Passwall2 core updater (latest OpenWrt + Passwall2 only)
+# Passwall2 core updater (OpenWrt latest)
 
 LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 USER="root"
 PASS="123456789"
 APPS="xray sing-box hysteria"
 
-# login and grab sysauth cookie
 COOKIE=$(curl -s -i -d "luci_username=$USER&luci_password=$PASS" \
     $LUCIBASE/admin/passwall2 | grep -o 'sysauth=[^;]*')
 
 for app in $APPS; do
-    INFO=$(curl -s --cookie "$COOKIE" "$LUCIBASE/admin/services/passwall2/get_${app}_info/check")
+    # trigger remote refresh
+    curl -s --cookie "$COOKIE" "$LUCIBASE/admin/services/passwall2/get_${app}_info/check" >/dev/null
+    
+    # now read fresh info
+    INFO=$(curl -s --cookie "$COOKIE" "$LUCIBASE/admin/services/passwall2/get_${app}_info")
 
     REMOTE=$(echo "$INFO" | jsonfilter -e '@.remote_version' 2>/dev/null)
     LOCAL=$(echo "$INFO" | jsonfilter -e '@.local_version' 2>/dev/null)
