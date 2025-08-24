@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # --------- CONFIGURATION ---------
-LUCIPASS="YOUR_LUCI_PASSWORD"
+LUCIPASS="123456789"
 LUCIUSER="root"
 LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 APPNAME="sing-box"
