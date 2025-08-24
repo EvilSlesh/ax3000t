@@ -1,9 +1,9 @@
 #!/bin/sh
-# Minimal Passwall2 sing-box update checker
+# Passwall2 sing-box updater (with delay after check)
 
 LUCIBASE="http://127.0.0.1/cgi-bin/luci"
 USER="root"
-PASS="123456789"
+PASS="YOURPASSWORD"
 
 COOKIE=$(curl -s -i -d "luci_username=$USER&luci_password=$PASS" \
     $LUCIBASE/admin/passwall2 | grep -o 'sysauth=[^;]*')
@@ -11,7 +11,10 @@ COOKIE=$(curl -s -i -d "luci_username=$USER&luci_password=$PASS" \
 # Step 1: trigger remote check
 curl -s --cookie "$COOKIE" "$LUCIBASE/admin/services/passwall2/get_sing-box_info/check" >/dev/null
 
-# Step 2: read info
+# Step 2: wait a bit for remote info to refresh
+sleep 2
+
+# Step 3: read info
 INFO=$(curl -s --cookie "$COOKIE" "$LUCIBASE/admin/services/passwall2/get_sing-box_info")
 
 REMOTE=$(echo "$INFO" | jsonfilter -e '@.remote_version' 2>/dev/null)
