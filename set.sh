@@ -165,6 +165,11 @@ install_tmp kmod-tun
 install_tmp kmod-nft-tproxy
 install_tmp kmod-nft-socket
 #install_tmp kmod-netlink-diag
+#install_tmp wget-ssl
+#install_tmp unzip
+#install_tmp ca-bundle
+#install_tmp kmod-inet-diag
+#install_tmp kernel
 install_tmp sing-box "https://github.com/SagerNet/sing-box/releases/download/v1.11.15/sing-box_1.11.15_openwrt_${ARCH}.ipk"
 install_tmp hysteria
 opkg --force-overwrite upgrade luci-app-passwall2
