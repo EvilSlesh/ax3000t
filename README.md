@@ -24,7 +24,7 @@ rm -f /tmp/set.sh && wget -O /tmp/set.sh https://raw.githubusercontent.com/sadra
 - Working internet connection
 
 ## Default Settings
-- Default root password: 123456789 (Change after installation!)
+- Default root & wifi password: 123456789 (Change after installation!)
 - Timezone: Asia/Tehran
 - DNS: Google DNS (8.8.4.4, 2001:4860:4860::8844)
 
