@@ -29,7 +29,12 @@ rm -f /tmp/set.sh && wget -O /tmp/set.sh https://raw.githubusercontent.com/sadra
 - DNS: Google DNS (8.8.4.4, 2001:4860:4860::8844)
 
 ## Info on Passwall2 Update App
-Passwall2 uses its own method to update cores (Xray, Sing-box, and Hysteria). It calls the backend API to fetch package versions and determine whether an update is needed. The update process downloads the raw binary data and replaces the existing files. Note that it does not use the opkg upgrade command, which allows it to bypass storage limitations on some routers. In future versions of the script (work in progress [app.sh]), we will mimic this behavior and use the Passwall2 API to automatically install the latest version of all cores. For now, Sing-box update must be performed manually using Passwall2 App Update page after running this script, while the other packages are installed with their latest versions.
+Passwall2 uses its own method to update cores (Xray, Sing-box, and Hysteria). It calls the backend API to fetch package versions and determine whether an update is needed. The update process downloads the raw binary data and replaces the existing files. Note that it does not use the opkg upgrade command, which allows it to bypass storage limitations on some routers. In future versions of the script, we will mimic this behavior and use the Passwall2 API to automatically install the latest version of all cores. For now, Sing-box update must be performed manually using Passwall2 App Update page after running this script, while the other packages are installed with their latest versions.
 
 ## Note
 On Xiaomi AX3000T, factory partitioning results in an overlay size of approximately 60 MB, compared to around 90 MB available on similar routers. The script is optimized to work with this limited storage space. To regain more free space, you would need to modify the factory partitioning via UART or directly flash the ROM chip (not recommended). If you modify the factory partitions, recovering the original firmware is only possible using these methods.
+
+## Future Plans (work in progress)
+- Adding script call input parametter to skip --wifi --rootpw --iran [set.sh]
+- Auto update cores using Passwall2 API [app.sh]
+- Advanced DNS config for Iran Network [adv.sh]
